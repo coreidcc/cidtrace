@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Implementation-Title: cc.coreid.tracer
+Bundle-SymbolicName: slf4j.api
+Bundle-Name: slf4j-api
+Bundle-Vendor: SLF4J.ORG
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Premain-Class : cc.coreid.tracer.Agent
