@@ -2,6 +2,7 @@ package cc.coreid.tracer;
 
 import javassist.ClassPool;
 import javassist.CtClass;
+import javassist.NotFoundException;
 
 import java.io.ByteArrayInputStream;
 import java.lang.instrument.ClassFileTransformer;
@@ -20,7 +21,14 @@ public class Agent {
     }
 
     public static class Transformer implements ClassFileTransformer {
+        private final CtClass clEx;
+
         public Transformer(Properties cfg) {
+            try {
+                clEx = ClassPool.getDefault().get("java.lang.Exception");
+            } catch (NotFoundException ex) {
+                throw new RuntimeException("Resolving ClassPool.getDefault().get(\"java.io.IOException\")", ex);
+            }
         }
 
         public byte[] transform(ClassLoader loader, String className, Class<?> clazz, ProtectionDomain domain, byte[] bytes) {
@@ -30,7 +38,7 @@ public class Agent {
             try {
                 if (className.startsWith("cc/coreid/tracer/Point")) {  // FIXME: remove just for initial testing
                     cl = pool.makeClass(new ByteArrayInputStream(bytes));
-                    Instrumentation.doInstrumentation(cl);
+                    Instrumentation.doInstrumentation(cl, clEx);
                     bytes = cl.toBytecode();
                 }
             } catch (Exception ex) {

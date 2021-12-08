@@ -1,0 +1,22 @@
+first draft of instrumentation using javassist
+
+- generates basic enter/leave traces by emitting JUL.log calls
+- per default instrument all public methods of all classes
+- demonstrate the use of annotations to fine tune tracing
+
+Missing.... hell a lot
+- global configuration to control
+  - which classes/packages to be instrumented
+  - list for to be masked out method parameters
+- refine annotation support
+- application of sane configuration defaults
+- dedicated getter/setter support
+- decent coverage with automated tests
+
+FIXMEs/HACKs:
+- some hard coded class/package names
+- get rid of quick and dirty shell scripts
+- ger rid of Main and Point classes
+
+Optimization:
+- minimize string concatenations

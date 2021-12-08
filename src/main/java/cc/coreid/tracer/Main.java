@@ -18,8 +18,9 @@ public class Main {
             pool.appendClassPath(new ClassClassPath(java.util.logging.Logger.class));
             pool.appendClassPath(new ClassClassPath(java.util.logging.Level.class));
             CtClass cl = pool.get("cc.coreid.tracer.Point");
+            CtClass ex = ClassPool.getDefault().get("java.lang.Exception");
             pool.get("java.util.logging.Logger");
-            Instrumentation.doInstrumentation(cl);
+            Instrumentation.doInstrumentation(cl, ex);
             cl.writeFile("target/classes");
         } catch (Exception e) {
             e.printStackTrace();

@@ -15,15 +15,17 @@ public class Instrumentation {
     static final String LOGGER_NAME = "_cc_log_";
     private static final Logger log = Logger.getLogger(Instrumentation.class.getName());
     private final CtClass cl;
+    private final CtClass clEx;
 
-    public Instrumentation(CtClass cl) {
+    public Instrumentation(CtClass cl, CtClass ex) {
         this.cl = cl;
+        this.clEx = ex;
     }
 
-    public static void doInstrumentation(CtClass cl) {
+    public static void doInstrumentation(CtClass cl, CtClass ex) {
         assert (cl != null);
         if (!cl.isInterface()) {
-            Instrumentation li = new Instrumentation(cl);
+            Instrumentation li = new Instrumentation(cl, ex);
             li.doInstrumentation();
         }
     }
@@ -40,7 +42,7 @@ public class Instrumentation {
                 }
             }
         } catch (Exception ex) {
-            log.log(Level.WARNING, "Instrumentation.doInstrumentClass failed: '" + cl.getName() + "'", ex);
+            log.log(Level.WARNING, "Instrumentation.doInstrumentClass failed: '" + cl.getName() + "'", ex); //NOSONAR
         }
     }
 
@@ -69,7 +71,7 @@ public class Instrumentation {
             }
         }
         // swallow it as Exception is used for if/then/else
-        catch (NotFoundException ignored) {
+        catch (NotFoundException ignored) { //NOSONAR
         }
         return isInstrumentationNeeded;
     }
@@ -107,13 +109,22 @@ public class Instrumentation {
         log.log(Level.FINE, mSig);
         m.insertBefore(mSig);
 
-        String retV = methodReturn(m);
-        retV = String.format(
+        String mRet = methodReturn(m);
+        mRet = String.format(
                 "if(%s.isLoggable(java.util.logging.Level.FINEST))" +
                         "%s.log(java.util.logging.Level.FINEST,\"%s\");",
-                LOGGER_NAME, LOGGER_NAME, retV);
-        log.log(Level.FINE, retV);
-        m.insertAfter(retV);
+                LOGGER_NAME, LOGGER_NAME, mRet);
+        log.log(Level.FINE, mRet);
+        m.insertAfter(mRet);
+
+        String mExc = methodException(m);
+        mExc = String.format(
+                "{ if(%s.isLoggable(java.util.logging.Level.FINEST))" +
+                        "%s.log(java.util.logging.Level.FINEST,\"%s\");"+
+                "  throw $e; }",
+                LOGGER_NAME, LOGGER_NAME, mExc);
+        log.log(Level.FINE, mExc);
+        m.addCatch(mExc, clEx);
     }
 
     String methodSignature(CtBehavior m) throws NotFoundException {
@@ -166,8 +177,6 @@ public class Instrumentation {
         int modifiers = m.getModifiers();
         // first argument of non-static methods is 'this' pointer -> skip over
         if (!Modifier.isStatic(modifiers)) i++;
-        // skip over object synchronization
-        // if (Modifier.isSynchronized(modifiers)) i++;
         return localVars.variableName(i);
     }
 
@@ -198,6 +207,7 @@ public class Instrumentation {
         return res;
     }
 
+
     String methodReturn(CtBehavior m) throws NotFoundException {
         StringBuilder sb = new StringBuilder("<<< } ");
         if (m instanceof CtConstructor) {
@@ -210,6 +220,10 @@ public class Instrumentation {
             sb.append(": <void>");
         }
         return sb.toString();
+    }
+
+    String methodException(CtBehavior m) {
+        return "<<< } "+cl.getName()+"."+m.getName()+" : \"+$e+\"";
     }
 
     boolean isVoid(CtBehavior m) throws NotFoundException {

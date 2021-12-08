@@ -19,6 +19,11 @@ public class Point {
         x.arrayParameters(new int[]{3, 4});
         x.maskArgument(5, 6, "password");
         x.publicExclude(7, 8);
+        x.multipleReturn(0);
+        x.multipleReturn(1);
+        x.multipleReturn(2);
+        x.traceExeptions(0);
+        x.traceExeptions(1);
     }
 
     synchronized public void publicMove(int x, int y) {
@@ -53,6 +58,23 @@ public class Point {
     private void privateInclude(int x, int y) {
         this.x = x;
         this.y = y;
+    }
+
+    public int multipleReturn(int x) {
+        switch(x) {
+            case 1: return 1;
+            case 2: return 2;
+            default: return 0;
+        }
+    }
+
+    public int traceExeptions(int x) {
+        if(x == 1) {
+            return 0;
+        }
+        else {
+            throw new RuntimeException("guguseli");
+        }
     }
 
 }
