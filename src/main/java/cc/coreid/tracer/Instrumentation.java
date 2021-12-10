@@ -140,7 +140,7 @@ public class Instrumentation {
 
         // trace obj-instance for non-static methods
         if (mi.isMethod() && !Modifier.isStatic(m.getModifiers())) {
-            sb.append("\"+$0+\"").append(m.getName()).append("(");
+            sb.append("\"+$0+\".").append(m.getName()).append("(");
         } else {
             sb.append(cl.getName()).append(".").append(m.getName()).append("(");
         }
@@ -210,20 +210,30 @@ public class Instrumentation {
 
     String methodReturn(CtBehavior m) throws NotFoundException {
         StringBuilder sb = new StringBuilder("<<< } ");
+
         if (m instanceof CtConstructor) {
             sb.append(":\"+").append("$0").append("+\"");
-        } else if (!isVoid(m)) {
-            sb.append(cl.getName()).append(".").append(m.getName());
-            sb.append(" : \"+").append("$1").append("+\"");
+        }
+        else {
+            if (Modifier.isStatic(m.getModifiers())) {
+                sb.append(cl.getName()).append(".").append(m.getName());
+            } else {
+                sb.append("\"+").append("$0").append("+\".").append(m.getName());
+            }
+        } if (isVoid(m)) {
+            sb.append(" : void");
         } else {
-            sb.append(cl.getName()).append(".").append(m.getName());
-            sb.append(": <void>");
+            sb.append(" : '\"+").append("$_").append("+\"'");
         }
         return sb.toString();
     }
 
     String methodException(CtBehavior m) {
-        return "<<< } "+cl.getName()+"."+m.getName()+" : \"+$e+\"";
+        if (Modifier.isStatic(m.getModifiers())) {
+            return "<<< } " + cl.getName() + "." + m.getName() + " : \"+$e+\"";
+        } else {
+            return "<<< } \"+$0+\"."+m.getName()+" : \"+$e+\"";
+        }
     }
 
     boolean isVoid(CtBehavior m) throws NotFoundException {

@@ -76,5 +76,4 @@ public class Point {
             throw new RuntimeException("guguseli");
         }
     }
-
 }

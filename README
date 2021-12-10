@@ -11,7 +11,7 @@ Missing.... hell a lot
 - refine annotation support
 - application of sane configuration defaults
 - dedicated getter/setter support
-- decent coverage with automated tests
+- basic test are available / extend for configuration options (once they are available)
 
 FIXMEs/HACKs:
 - some hard coded class/package names
