@@ -13,6 +13,10 @@ public class Point {
     // public and static
     public static void main(String[] argv) {
         log.log(Level.CONFIG, "Point.main.....");
+        String rootPath = Thread.currentThread().getContextClassLoader().getResource("").getPath();
+        System.out.println("rootPath='"+rootPath+"'");
+
+
         Point x = new Point();
         x.publicMove(1, 2);
         x.privateMove(1, 2);
@@ -24,6 +28,7 @@ public class Point {
         x.multipleReturn(2);
         x.traceExeptions(0);
         x.traceExeptions(1);
+
     }
 
     synchronized public void publicMove(int x, int y) {
